@@ -1,0 +1,206 @@
+{
+    --- remove this line at your own responsibility ---
+    "mode": "All",
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Consumption/budgets",
+          "name": "[parameters('budgetName')]",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/434105ed-43f6-45c7-a02f-909b2ba83430",
+            "/providers/Microsoft.Authorization/roleDefinitions/4a9ae827-6dc8-4573-8ac7-8239d42aa03f"
+          ],
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "name",
+                "equals": "[parameters('budgetName')]"
+              }
+            ]
+          },
+          "deploymentScope": "subscription",
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "budgetName": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string"
+                  },
+                  "endDate": {
+                    "type": "string"
+                  },
+                  "timeGrain": {
+                    "type": "string"
+                  },
+                  "firstThreshold": {
+                    "type": "string"
+                  },
+                  "secondThreshold": {
+                    "type": "string"
+                  },
+                  "contactEmails": {
+                    "type": "array"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                    {
+                        "type": "Microsoft.Consumption/budgets",
+                        "apiVersion": "2019-10-01",
+                        "name": "[parameters('budgetName')]",
+                        "properties": {
+                          "timePeriod": {
+                            "startDate": "[parameters('startDate')]",
+                            "endDate": "[parameters('endDate')]"
+                          },
+                          "timeGrain": "[parameters('timeGrain')]",
+                          "amount": "[parameters('amount')]",
+                          "category": "Cost",
+                          "notifications": {
+                            "NotificationForExceededBudget1": {
+                              "enabled": true,
+                              "operator": "GreaterThan",
+                              "threshold": "[parameters('firstThreshold')]",
+                              "contactEmails": "[parameters('contactEmails')]"
+                            },
+                            "NotificationForExceededBudget2": {
+                              "enabled": true,
+                              "operator": "GreaterThan",
+                              "threshold": "[parameters('secondThreshold')]",
+                              "contactEmails": "[parameters('contactEmails')]"
+                            }
+                          }
+                        }
+                      }
+                ]
+              },
+              "parameters": {
+                "budgetName": {
+                  "value": "[parameters('budgetName')]"
+                },
+                "amount": {
+                  "value": "[parameters('amount')]"
+                },
+                "startDate": {
+                  "value": "[parameters('startDate')]"
+                },
+                "endDate": {
+                  "value": "[parameters('endDate')]"
+                },
+                "timeGrain": {
+                  "value": "[parameters('timeGrain')]"
+                },
+                "firstThreshold": {
+                  "value": "[parameters('firstThreshold')]"
+                },
+                "secondThreshold": {
+                  "value": "[parameters('secondThreshold')]"
+                },
+                "contactEmails": {
+                  "value": "[parameters('contactEmails')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "budgetName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "BudgetName",
+          "description": "Budget Name."
+        },
+        "defaultValue": "SubscriptionBudget"
+      },
+      "amount": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Amount",
+          "description": "The total amount of cost to track with the budget"
+        },
+        "defaultValue": "1000"
+      },
+      "startDate": {
+        "type": "String",
+        "metadata": {
+          "displayName": "StartDate",
+          "description": "The start date for the budget. (Day must be always the 1st day of the month)"
+        },
+        "defaultValue": "2020-10-01"
+      },
+      "endDate": {
+        "type": "String",
+        "metadata": {
+          "displayName": "EndDate",
+          "description": "The end date for the budget."
+        },
+        "defaultValue": "2030-01-01"
+      },
+      "timeGrain": {
+        "type": "String",
+        "metadata": {
+          "displayName": "TimeGrain",
+          "description": "The time covered by a budget. Tracking of the amount will be reset based on the time grain."
+        },
+        "allowedValues": [
+          "monthly",
+          "quarterly",
+          "annually"
+        ],
+        "defaultValue": "monthly"
+      },
+      "firstThreshold": {
+        "type": "String",
+        "metadata": {
+          "displayName": "First Threshold",
+          "description": "First threshold value associated with a notification. Notification is sent when the cost exceeded the threshold. It is always percent and has to be between 0 and 1000. (default 50)"
+        },
+        "defaultValue": "50"
+      },
+      "secondThreshold": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Second Threshold",
+          "description": "Second threshold value associated with a notification. Notification is sent when the cost exceeded the threshold. It is always percent and has to be between 0 and 1000. (default 90)"
+        },
+        "defaultValue": "90"
+      },
+      "contactEmails": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Contact Emails",
+          "description": "Email addresses to send the budget notification to when the threshold is exceeded."
+        }
+      }
+    }
+  }
