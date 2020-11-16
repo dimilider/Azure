@@ -1,0 +1,178 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "LogicAppName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "defaultValue": "MyLogicApp",
+            "metadata": {
+                "description": "The resource name to use for the logic app"
+            }
+        },
+        "managementGroupId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The Management Group ID where your Diag Policy is assigned e.g. MyRoot"
+            }
+        },
+        "policyAssignmentId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The Policy Assignment ID of your Diag Policy Initiative e.g. b6102075ed204635ba90c861"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "properties": {
+                "state": "Disabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "actions": {
+                        "Compose": {
+                            "inputs": "@body('HTTP')?['value']?[0]?['policyAssignments']?[0]?['policyDefinitions']",
+                            "runAfter": {
+                                "HTTP": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose"
+                        },
+                        "ForEach": {
+                            "actions": {
+                                "HTTP_2": {
+                                    "inputs": {
+                                        "authentication": {
+                                            "type": "ManagedServiceIdentity"
+                                        },
+                                        "body": {
+                                            "properties": {
+                                                "policyAssignmentId": "/providers/microsoft.management/managementGroups/@{variables('managementGroupId')}/providers/microsoft.authorization/policyassignments/@{variables('policyAssignmentId')}",
+                                                "policyDefinitionReferenceId": "@{items('ForEach')['policyDefinitionReferenceId']}"
+                                            }
+                                        },
+                                        "method": "PUT",
+                                        "uri": "https://management.azure.com/providers/Microsoft.Management/managementGroups/@{variables('managementGroupId')}/providers/Microsoft.PolicyInsights/remediations/@{items('ForEach')['policyDefinitionReferenceId']}-@{utcNow('yyyy-mm-dd-HH-MM-ss')}?api-version=2019-07-01"
+                                    },
+                                    "runAfter": {},
+                                    "type": "Http"
+                                }
+                            },
+                            "foreach": "@outputs('Compose')",
+                            "runAfter": {
+                                "Compose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "HTTP": {
+                            "inputs": {
+                                "authentication": {
+                                    "type": "ManagedServiceIdentity"
+                                },
+                                "method": "POST",
+                                "uri": "https://management.azure.com/providers/Microsoft.Management/managementGroups/@{variables('managementGroupId')}/providers/Microsoft.PolicyInsights/policyStates/latest/summarize?api-version=2019-10-01&$filter=(PolicyDefinitionAction eq 'deployifnotexists') and PolicyAssignmentId eq '/providers/microsoft.management/managementgroups/@{variables('managementGroupId')}/providers/microsoft.authorization/policyassignments/@{variables('policyAssignmentId')}'"
+                            },
+                            "runAfter": {
+                                "policyAssignmentId": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http"
+                        },
+                        "managementGroupId": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "managementGroupId",
+                                        "type": "string",
+                                        "value": "@parameters('$managementGroupId')"
+                                    }
+                                ]
+                            },
+                            "runAfter": {},
+                            "type": "InitializeVariable"
+                        },
+                        "policyAssignmentId": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "policyAssignmentId",
+                                        "type": "string",
+                                        "value": "@parameters('$policyAssignmentId')"
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "managementGroupId": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        }
+                    },
+                    "contentVersion": "1.0.0.0",
+                    "outputs": {},
+                    "parameters": {
+                        "policyAssignmentId": {
+                            "type": "string",
+                            "defaultValue": "",
+                            "metadata": {
+                                "description": "The Policy Assignment ID of your Diag Policy Initiative e.g. b6102075ed204635ba90c861"
+                            }
+                        },
+                        "managementGroupId": {
+                            "type": "string",
+                            "defaultValue": "",
+                            "metadata": {
+                                "description": "The Management Group ID where your Diag Policy is assigned e.g. MyRoot"
+                            }
+                        }
+                    },
+                    "triggers": {
+                        "Recurrence": {
+                            "recurrence": {
+                                "frequency": "Month",
+                                "interval": 3
+                            },
+                            "type": "Recurrence"
+                        }
+                    }
+                },
+                "parameters": {
+                    "policyAssignmentId": {
+                        "value": "[parameters('policyAssignmentId')]"
+                    },
+                    "managementGroupId": {
+                        "value": "[parameters('managementGroupId')]"
+                    }
+                },
+                "accessControl": {}
+            },
+            "name": "[parameters('LogicAppName')]",
+            "type": "Microsoft.Logic/workflows",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "LogicApp"
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "apiVersion": "2016-06-01",
+            "dependsOn": [
+            ]
+        }
+    ],
+    "outputs": {
+        "ManagedIdentityPrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Logic/workflows', parameters('LogicAppName')), '2016-06-01', 'full').identity.principalId]"
+        }
+    }
+}
