@@ -6,3 +6,4 @@
 
 This Logic App will be triggered by recurring scheduler to trigger policy remediation on your noncompliant DeployIfNotExists policies. 
 
+> **_NOTE:_**  Please make sure to provide at least the "Resource Policy Contributor" RBAC role for the System Managed Identity of the Logic App on the Management Group scope where your policy-(set) is assigned. 
