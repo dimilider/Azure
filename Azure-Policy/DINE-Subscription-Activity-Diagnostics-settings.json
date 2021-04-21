@@ -1,0 +1,381 @@
+{
+    "mode": "All",
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "name": "[parameters('diagnosticSettingsName')]",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Administrative"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('Administrative')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Security"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('Security')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "ServiceHealth"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('ServiceHealth')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Alert"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('Alert')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Recommendation"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('Recommendation')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Policy"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('Policy')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Autoscale"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('Autoscale')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "ResourceHealth"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('ResourceHealth')]"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "greaterorequals": "[length(field('Microsoft.Insights/diagnosticSettings/logs[*]'))]"
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                "equals": "[parameters('workspaceId')]"
+              }
+            ]
+          },
+          "deploymentScope": "subscription",
+          "deployment": {
+            "location": "eastus",
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "diagnosticSettingsName": {
+                    "type": "string"
+                  },
+                  "workspaceId": {
+                    "type": "string"
+                  },
+                  "Administrative": {
+                    "type": "string"
+                  },
+                  "Security": {
+                    "type": "string"
+                  },
+                  "ServiceHealth": {
+                    "type": "string"
+                  },
+                  "Alert": {
+                    "type": "string"
+                  },
+                  "Recommendation": {
+                    "type": "string"
+                  },
+                  "Policy": {
+                    "type": "string"
+                  },
+                  "Autoscale": {
+                    "type": "string"
+                  },
+                  "ResourceHealth": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Insights/diagnosticSettings",
+                    "apiVersion": "2017-05-01-preview",
+                    "name": "[parameters('diagnosticSettingsName')]",
+                    "location": "westeurope",
+                    "properties": {
+                      "workspaceId": "[parameters('workspaceId')]",
+                      "logs": [
+                        {
+                          "category": "Administrative",
+                          "enabled": "[parameters('Administrative')]"
+                        },
+                        {
+                          "category": "Security",
+                          "enabled": "[parameters('Security')]"
+                        },
+                        {
+                          "category": "ServiceHealth",
+                          "enabled": "[parameters('ServiceHealth')]"
+                        },
+                        {
+                          "category": "Alert",
+                          "enabled": "[parameters('Alert')]"
+                        },
+                        {
+                          "category": "Recommendation",
+                          "enabled": "[parameters('Recommendation')]"
+                        },
+                        {
+                          "category": "Policy",
+                          "enabled": "[parameters('Policy')]"
+                        },
+                        {
+                          "category": "Autoscale",
+                          "enabled": "[parameters('Autoscale')]"
+                        },
+                        {
+                          "category": "ResourceHealth",
+                          "enabled": "[parameters('ResourceHealth')]"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "workspaceId": {
+                  "value": "[parameters('workspaceId')]"
+                },
+                "diagnosticSettingsName": {
+                  "value": "[parameters('diagnosticSettingsName')]"
+                },
+                "Administrative": {
+                  "value": "[parameters('Administrative')]"
+                },
+                "Security": {
+                  "value": "[parameters('Security')]"
+                },
+                "ServiceHealth": {
+                  "value": "[parameters('ServiceHealth')]"
+                },
+                "Alert": {
+                  "value": "[parameters('Alert')]"
+                },
+                "Recommendation": {
+                  "value": "[parameters('Recommendation')]"
+                },
+                "Policy": {
+                  "value": "[parameters('Policy')]"
+                },
+                "Autoscale": {
+                  "value": "[parameters('Autoscale')]"
+                },
+                "ResourceHealth": {
+                  "value": "[parameters('ResourceHealth')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "workspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics Workspace resourceId",
+          "description": "The full resourceId of the LAWS to send logs to. For example, /subscriptions/5857f4d2-3dce-4b96-ad95-677f764e7a67/resourcegroups/rglawsactivitylogs2/providers/microsoft.operationalinsights/workspaces/lawsactivitylogs2",
+          "strongType": "omsWorkspace"
+        }
+      },
+      "diagnosticSettingsName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Name of the activity log diagnosticsSettings",
+          "description": "Name of the activity log diagnosticsSettings"
+        },
+        "defaultValue": "SendToGovernanceLAW"
+      },
+      "Administrative": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: Administrative",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "Security": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: Security",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "ServiceHealth": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: ServiceHealth",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "Alert": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: Alert",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "Recommendation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: Recommendation",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "Policy": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: Policy",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "Autoscale": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: Autoscale",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "ResourceHealth": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Category: ResourceHealth",
+          "description": "Enable Logs - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      }
+    }
+  }
